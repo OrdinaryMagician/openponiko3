@@ -5,10 +5,18 @@
 	Released under the MIT License.
 */
 #include "common.h"
+#include "ponikocfg.h"
+#include "ircbase.h"
 int main( void )
 {
 	/* greeting */
 	puts("OpenPONIKO 3.0 - Compiled on " __DATE__ " " __TIME__);
-	/* TODO */
+	/* load config */
+	if ( loadcfg() )
+		return bail("Couldn't load configuration\n");
+	if ( !ircopen() )
+		return bail("Couldn't connect to default irc server\n");
+	while ( ircactive() )
+		process();
 	return 0;
 }

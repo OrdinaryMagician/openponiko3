@@ -1,11 +1,12 @@
 #!/bin/zsh
 CFLAGS="-march=native -std=c99 -Os -pipe -Wall -Wextra -Werror -pedantic \
-	-Wno-unused-function -Wno-unused-parameter \
-	$(pkg-config --cflags sqlite3)"
-LDFLAGS="$(pkg-config --libs sqlite3)"
+	-Wno-unused-function -Wno-unused-parameter -Wno-unused-variable \
+	$(pkg-config --cflags sqlite3) $(pkg-config --cflags yajl)"
+LDFLAGS="$(pkg-config --libs sqlite3) $(pkg-config --libs yajl)"
 NAME="poniko3"
 SOURCES=( src/*.c )
 SOURCESO=${SOURCES//%.c/.o}
+CC=${CC:-clang}
 case $1 in
  clean)
   for f in ${SOURCES}
@@ -23,10 +24,10 @@ case $1 in
     do
      f2=${f/%.c/.o}
      echo -e "\e[1;32m[OBJ]\e[0m $(basename ${f}) -> $(basename ${f2})"
-     cc ${=CFLAGS} -c -o ${f2} ${f}
+     $CC ${=CFLAGS} -c -o ${f2} ${f}
     done
    echo -e "\e[1;32m[BIN]\e[0m ${NAME}"
-   cc -o ${NAME} ${=SOURCESO}
+   $CC -o ${NAME} ${=SOURCESO}
    strip -s ${NAME}
   ;;
 esac
