@@ -9,4 +9,9 @@ x86_64 Linux with an active internet connection (obviously)
 
 ## Build requirements
 * sqlite3 (for databases)
+* curl (for HTTP handling)
 * yajl (for certain website APIs)
+
+## About buildscripts
+OpenPONIKO 3.0 uses an AOS buildscript for compiling and linking.
+It requires Zsh and (by default, unless $CC is overriden) Clang.

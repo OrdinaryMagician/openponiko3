@@ -14,6 +14,15 @@
 #define BOT_REJOIN 0x10 /* auto rejoin when kicked? */
 #define BOT_EXTERN 0x20 /* can we execute external scripts? */
 #define BOT_DELAY  0x40 /* is delay between commands active? */
+/* shoutbot variables (all on by default) */
+char botflags;
+/* other flags */
+char active;
+char autojoined;
+/* send data */
+int ircsend( int ssock, const char *fmt, ... );
+/* receive data */
+int ircget( int ssock, char *to, int max );
 /* are we still running? */
 int ircactive( void );
 /* open irc connection */

@@ -14,9 +14,10 @@ int main( void )
 	/* load config */
 	if ( loadcfg() )
 		return bail("Couldn't load configuration\n");
-	if ( !ircopen() )
+	if ( ircopen() )
 		return bail("Couldn't connect to default irc server\n");
-	while ( ircactive() )
+	while ( active )
 		process();
+	ircclose();
 	return 0;
 }

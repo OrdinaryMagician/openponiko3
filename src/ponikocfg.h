@@ -9,9 +9,11 @@
 typedef struct
 {
 	char server[256];
+	char port[256];
 	char chan[256];
 	char user[256];
 	char nick[256];
+	char name[256];
 	char pass[256];
 	char owner[256];
 } config_t;

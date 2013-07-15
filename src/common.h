@@ -6,13 +6,11 @@
 */
 #ifndef COMMON_H
 #define COMMON_H
+/* needed for some stuff */
+#define _BSD_SOURCE
 /* external code */
 #include <stdio.h>
 #include <unistd.h>
-/* some constants */
-#ifndef CFGPATH
-#define CFGPATH "/etc/poniko3.conf"
-#endif
 /* error out */
 int bail( const char *, ... );
 #endif
