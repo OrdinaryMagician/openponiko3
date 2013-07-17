@@ -42,7 +42,8 @@ int ircsend( int ssock, const char *fmt, ... )
 		sendbuf[350] = '\0';
 		strcat(sendbuf,"...");
 	}
-	printf("[%d] >>> %s\n",sock,sendbuf);
+	ptime("[%Y/%m/%d %H:%M:%S]",NULL);
+	printf(" >>> %s\n",sendbuf);
 	/* append crlf */
 	strcat(sendbuf,"\r\n");
 	/* time to send */
@@ -125,7 +126,8 @@ void process( void )
 	if ( (len = ircget(sock,getbuf,512)) < 0 )
 		return;
 	getbuf[len-2] = 0;	/* trim crlf */
-	printf("[%d] <<< %s\n",sock,getbuf);
+	ptime("[%Y/%m/%d %H:%M:%S]",NULL);
+	printf(" <<< %s\n",getbuf);
 	/* generate argument list */
 	char *s, *t, **av, *source, *c, *temp;
 	int ac;
@@ -159,8 +161,8 @@ void process( void )
 	/* check for notices about our vhost */
 	else if ( !strcmp(c,"NOTICE") && !autojoined )
 	{
-		if ( (!strcmp(source,"HostServ")
-		     || !strcmp(source,"NickServ"))
+		if ( (!strncmp(source,"HostServ!",9)
+		     || !strncmp(source,"NickServ!",9))
 		     && strstr(av[1],"Your vhost of")
 		     && strstr(av[1],"is now activated.") )
 		{

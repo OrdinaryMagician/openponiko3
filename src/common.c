@@ -6,6 +6,7 @@
 */
 #include "common.h"
 #include <stdarg.h>
+/* error out */
 int bail( const char *m, ... )
 {
 	va_list arg;
@@ -13,4 +14,12 @@ int bail( const char *m, ... )
 	vfprintf(stderr,m,arg);
 	va_end(arg);
 	return 1;
+}
+/* timestamp */
+void ptime( const char *fmt, time_t *t )
+{
+	char stamp[256] = {0};
+	time_t tt = time(NULL);
+	strftime(stamp,256,fmt,localtime(t?t:&tt));
+	printf("%s",stamp);
 }

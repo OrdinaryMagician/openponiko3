@@ -15,10 +15,7 @@ static void readval( const char *from, const char *val, char *to )
 	int flen = strlen(val);
 	int llen = strlen(from);
 	if ( !strncmp(from,val,flen) )
-	{
 		strncpy(to,from+flen,(llen-flen)-1);
-		puts(to);
-	}
 }
 /* loads user config */
 int loadcfg( void )

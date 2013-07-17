@@ -11,6 +11,9 @@
 /* external code */
 #include <stdio.h>
 #include <unistd.h>
+#include <time.h>
 /* error out */
 int bail( const char *, ... );
+/* timestamp */
+void ptime( const char *fmt, time_t *t );
 #endif

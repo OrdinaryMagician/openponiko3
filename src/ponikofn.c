@@ -8,6 +8,7 @@
 #include "ircbase.h"
 #include "ponikofn.h"
 #include "ponikocfg.h"
+#include "shoutbot.h"
 #include <string.h>
 #include <time.h>
 /* builtin commands */
@@ -102,9 +103,14 @@ int parsemesg( int sock, char **user, char *msg, char *replyto )
 	if ( !(botflags&BOT_EXTERN) )
 		goto skipcmd;
 skipcmd:
-	if ( strpbrk(msg,"abcdefghijklmnopqrstuvwxyz") && (strlen(msg) < 10)
-	     && !(botflags&BOT_SHOUT) )
+	if ( strpbrk(msg,"abcdefghijklmnopqrstuvwxyz") || (strlen(msg) < 10)
+	     || !(botflags&BOT_SHOUT) )
 		goto skipshout;
+	shout_get();
+	if ( shout_q.id )
+		ircsend(sock,"PRIVMSG %s :%s",replyto,shout_q.line);
+	if ( botflags&BOT_RECORD )
+		shout_save(user[0],replyto,msg);
 skipshout:
 	return 0;
 }

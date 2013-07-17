@@ -7,10 +7,14 @@
 #include "common.h"
 #include "ponikocfg.h"
 #include "ircbase.h"
+#include "shoutbot.h"
 int main( void )
 {
 	/* greeting */
 	puts("OpenPONIKO 3.0 - Compiled on " __DATE__ " " __TIME__);
+	/* shoutbot */
+	if ( shout_init() )
+		return bail("Couldn't init shoutbot core\n");
 	/* load config */
 	if ( loadcfg() )
 		return bail("Couldn't load configuration\n");
@@ -19,5 +23,6 @@ int main( void )
 	while ( active )
 		process();
 	ircclose();
+	shout_quit();
 	return 0;
 }
