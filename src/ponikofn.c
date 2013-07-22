@@ -43,24 +43,21 @@ static int who( int sock, char **user, char *msg, char *replyto )
 			":%s, %s said that at %s on %s",replyto,user[0],
 			shout_q.name,shout_q.channel,timestr);
 	}
-	else
-	{
-		quote_t got = {0,0,{0},{0},{0}};
-		shout_get_key(parm,&got);
-		if ( !got.id )
-			return ircsend(sock,"PRIVMSG %s "
-				":%s, no one said that",replyto,user[0]);
-		char timestr[256];
-		strftime(timestr,256,"%a %d/%m/%Y %H:%M:%S",
-			localtime((time_t*)&got.epoch));
-		if ( !strcmp(got.channel,"UNKNOWN") )
-			return ircsend(sock,"PRIVMSG %s "
-				":%s, %s said that on %s",replyto,user[0],
-				got.name,timestr);
+	quote_t got = {0,0,{0},{0},{0}};
+	shout_get_key(parm,&got);
+	if ( !got.id )
 		return ircsend(sock,"PRIVMSG %s "
-			":%s, %s said that at %s on %s",replyto,user[0],
-			got.name,got.channel,timestr);
-	}
+			":%s, no one said that",replyto,user[0]);
+	char timestr[256];
+	strftime(timestr,256,"%a %d/%m/%Y %H:%M:%S",
+		localtime((time_t*)&got.epoch));
+	if ( !strcmp(got.channel,"UNKNOWN") )
+		return ircsend(sock,"PRIVMSG %s "
+			":%s, %s said that on %s",replyto,user[0],
+			got.name,timestr);
+	return ircsend(sock,"PRIVMSG %s "
+		":%s, %s said that at %s on %s",replyto,user[0],
+		got.name,got.channel,timestr);
 }
 /* builtin lists */
 /*
