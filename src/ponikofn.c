@@ -15,16 +15,52 @@
 static int rawcmd( int sock, char **user, char *msg, char *replyto )
 {
 	if ( strcmp(user[2],cfg.owner) )
-	{
-		ircsend(sock,"PRIVMSG %s "
+		return ircsend(sock,"PRIVMSG %s "
 			":Warning: %s is not in the sudoers file, "
-			"this incident will be reported.",replyto,user[0]);
-		return 0;
-	}
+			"this incident will be reported",replyto,user[0]);
 	char *parm = strchr(msg,' ');
-	if ( parm++ )
-		ircsend(sock,parm);
-	return 0;
+	return parm?ircsend(sock,parm+1):0;
+}
+static int who( int sock, char **user, char *msg, char *replyto )
+{
+	char *parm = strchr(msg,' ');
+	if ( !parm || !(++parm) )
+		return ircsend(sock,"NOTICE %s "
+			":no parameter specified",user[0]);
+	if ( !strcmp(parm,"last") )
+	{
+		if ( !shout_q.id )
+			return ircsend(sock,"PRIVMSG %s "
+				":%s, I haven't shouted yet :/",replyto,user[0]);
+		char timestr[256];
+		strftime(timestr,256,"%a %d/%m/%Y %H:%M:%S",
+			localtime((time_t*)&shout_q.epoch));
+		if ( !strcmp(shout_q.channel,"UNKNOWN") )
+			return ircsend(sock,"PRIVMSG %s "
+				":%s, %s said that on %s",replyto,user[0],
+				shout_q.name,timestr);
+		return ircsend(sock,"PRIVMSG %s "
+			":%s, %s said that at %s on %s",replyto,user[0],
+			shout_q.name,shout_q.channel,timestr);
+	}
+	else
+	{
+		quote_t got = {0,0,{0},{0},{0}};
+		shout_get_key(parm,&got);
+		if ( !got.id )
+			return ircsend(sock,"PRIVMSG %s "
+				":%s, no one said that",replyto,user[0]);
+		char timestr[256];
+		strftime(timestr,256,"%a %d/%m/%Y %H:%M:%S",
+			localtime((time_t*)&got.epoch));
+		if ( !strcmp(got.channel,"UNKNOWN") )
+			return ircsend(sock,"PRIVMSG %s "
+				":%s, %s said that on %s",replyto,user[0],
+				got.name,timestr);
+		return ircsend(sock,"PRIVMSG %s "
+			":%s, %s said that at %s on %s",replyto,user[0],
+			got.name,got.channel,timestr);
+	}
 }
 /* builtin lists */
 /*
@@ -50,11 +86,13 @@ static int rawcmd( int sock, char **user, char *msg, char *replyto )
 char *builtin_names[] =
 {
 	"rawcommand",
+	"who",
 	NULL,
 };
 builtinfn_t builtin_funcs[] =
 {
 	rawcmd,
+	who,
 	NULL,
 };
 /* parse message from irc user */
@@ -70,25 +108,18 @@ int parsemesg( int sock, char **user, char *msg, char *replyto )
 	*/
 	/* some important internals */
 	if ( !strncasecmp(msg,"\001PING ",6) )
-	{
-		ircsend(sock,"NOTICE %s :%s",replyto,msg);
-		putchar('\a');
-		return 0;
-	}
+		return (ircsend(sock,"NOTICE %s :%s",replyto,msg)
+			||putchar('\a'))&0;
 	if ( !strcasecmp(msg,"\001TIME\001") )
 	{
 		char timestr[256];
 		time_t tt = time(NULL);
 		strftime(timestr,256,"%a %d/%m/%Y %H:%M:%S",localtime(&tt));
-		ircsend(sock,"NOTICE %s :%s",replyto,timestr);
-		return 0;
+		return ircsend(sock,"NOTICE %s :%s",replyto,timestr)&0;
 	}
 	if ( !strcasecmp(msg,"\001VERSION\001") )
-	{
-		ircsend(sock,"NOTICE %s :%s",replyto,
-			"OpenPONIKO 3.0 - Compiled on " __DATE__ " " __TIME__);
-		return 0;
-	}
+		return ircsend(sock,"NOTICE %s :%s",replyto,
+			"OpenPONIKO 3.0 - Compiled on " __DATE__ " " __TIME__)&0;
 	if ( *msg != '!' )
 		goto skipcmd;
 	int i, len;
@@ -97,7 +128,7 @@ int parsemesg( int sock, char **user, char *msg, char *replyto )
 		len = strlen(builtin_names[i]);
 		if ( strncasecmp(msg+1,builtin_names[i],len) )
 			continue;
-		if ( builtin_funcs[i](sock,user,msg+1,replyto) < 0)
+		if ( builtin_funcs[i](sock,user,msg+1,replyto)<0 )
 			return -1;
 	}
 	if ( !(botflags&BOT_EXTERN) )

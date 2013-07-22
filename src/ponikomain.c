@@ -22,7 +22,5 @@ int main( void )
 		return bail("Couldn't connect to default irc server\n");
 	while ( active )
 		process();
-	ircclose();
-	shout_quit();
-	return 0;
+	return (ircclose()||shout_quit())!=0;
 }

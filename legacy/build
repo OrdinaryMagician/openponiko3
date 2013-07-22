@@ -1,0 +1,33 @@
+#!/bin/zsh
+CFLAGS="-march=native -std=c99 -Os -pipe -Wall -Wextra -Werror -pedantic \
+	$(pkg-config --cflags sqlite3)"
+LFLAGS="$(pkg-config --libs sqlite3)"
+NAME="migrate"
+SOURCES=( src/*.c )
+SOURCESO=${SOURCES//%.c/.o}
+CC=${CC:-clang}
+case $1 in
+ clean)
+  for f in ${SOURCES}
+   do
+    f2=${f/%.c/.o}
+    if [[ -e "${f2}" ]]
+     then
+      echo -e "\e[1;32m[RM]\e[0m $(basename ${f2})"
+      rm ${f2}
+    fi
+   done
+  ;;
+ *)
+   for f in ${SOURCES}
+    do
+     f2=${f/%.c/.o}
+     echo -e "\e[1;32m[OBJ]\e[0m $(basename ${f}) -> $(basename ${f2})"
+     $CC ${=CFLAGS} -c -o ${f2} ${f}
+    done
+   echo -e "\e[1;32m[BIN]\e[0m ${NAME}"
+   $CC ${=LFLAGS} -o ${NAME} ${=SOURCESO}
+   strip -s ${NAME}
+  ;;
+esac
+exit 0

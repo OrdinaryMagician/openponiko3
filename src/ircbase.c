@@ -44,11 +44,10 @@ int ircsend( int ssock, const char *fmt, ... )
 	}
 	ptime("[%Y/%m/%d %H:%M:%S]",NULL);
 	printf(" >>> %s\n",sendbuf);
-	/* append crlf */
-	strcat(sendbuf,"\r\n");
-	/* time to send */
-	if ( !strncasecmp(sendbuf,"QUIT",4) )	/* special check, autoquit */
+	/* special check, autoquit */
+	if ( !strncasecmp(strcat(sendbuf,"\r\n"),"QUIT",4) )
 		active = 0;
+	/* time to send */
 	return send(ssock,sendbuf,strlen(sendbuf),0);
 }
 /* receive data */
@@ -59,12 +58,10 @@ int ircget( int ssock, char *to, int max )
 	do
 	{
 		res = recv(ssock,&tmp,1,0);
-		if ( res < 0 )	/* connection error, possibly */
-		{
-			/* will implement reconnecting later, just quit for now */
-			active = 0;
-			return -1;
-		}
+		/* connection error, possibly */
+		/* will implement reconnecting later, just quit for now */
+		if ( res < 0 )	
+			return (active=0)-1;
 		if ( res > 0 )
 		{
 			restotal += res;
@@ -102,9 +99,8 @@ int ircopen( void )
 		bail("ircopen error: %s\n",strerror(h_errno));
 	ircsend(sock,"USER %s %s %s :%s",cfg.user,cfg.user,cfg.server,cfg.name);
 	ircsend(sock,"NICK %s",cfg.nick);
-	active = 1;
 	signal(SIGTERM,ircterm);
-	return 0;
+	return (active=1)&0;
 }
 /* close irc connection */
 int ircclose( void )
@@ -112,18 +108,17 @@ int ircclose( void )
 	if ( sock )
 		ircsend(sock,"QUIT");
 	if ( (shutdown(sock,SHUT_RDWR) < 0) && (errno != ENOTCONN) )
-		bail("ircclose error: %s\n",strerror(errno));
+		return bail("ircclose error: %s\n",strerror(errno));
 	if ( close(sock) )
-		bail("ircclose error: %s\n",strerror(errno));
-	active = 0;
-	return 0;
+		return bail("ircclose error: %s\n",strerror(errno));
+	return (active=0);
 }
 /* process irc connection */
 void process( void )
 {
 	char getbuf[512];
-	int len;
-	if ( (len = ircget(sock,getbuf,512)) < 0 )
+	int len = ircget(sock,getbuf,512);
+	if ( len < 0 )
 		return;
 	getbuf[len-2] = 0;	/* trim crlf */
 	ptime("[%Y/%m/%d %H:%M:%S]",NULL);
