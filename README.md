@@ -5,7 +5,7 @@ Just a simple IRC bot.
 When you shout at her, she shouts back.
 
 ## Host requirements
-Any *nix with an active internet connection (obviously)
+Any *nix with an active internet connection (obviously).
 Might run on Windows with some patching.
 
 ## Build requirements
