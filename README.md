@@ -1,5 +1,7 @@
 # OpenPONIKO 3.0
 
+![Poniko](https://github.com/OrdinaryMagician/openponiko3/raw/master/poniko.png)
+
 ## About
 Just a simple IRC bot.
 When you shout at her, she shouts back.
