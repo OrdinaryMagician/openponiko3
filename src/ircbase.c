@@ -130,7 +130,7 @@ void process( void )
 		return;
 	ac = 0;
 	s = ((*temp == ':')?temp+1:temp);
-	av = (char**)malloc(sizeof(char*)*(++ac));
+	av = malloc(sizeof(char*)*(++ac));
 	for ( ;; )
 	{
 		av[ac-1] = (*s != ':')?s:s+1;
@@ -140,7 +140,7 @@ void process( void )
 			break;
 		while( *(++t) == ' ' );
 		s = t;
-		av = (char**)realloc(av,sizeof(char*)*(++ac));
+		av = realloc(av,sizeof(char*)*(++ac));
 	}
 	source = (*temp == ':')?(av++)[0]:NULL;
 	c = (av++)[0];
