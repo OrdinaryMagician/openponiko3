@@ -11,17 +11,17 @@
 			"EPOCH INTEGER NOT NULL, "\
 			"NAME TEXT NOT NULL, "\
 			"CHANNEL TEXT NOT NULL, "\
-			"LINE TEXT NOT NULL);"
+			"LINE TEXT NOT NULL)"
 #define QDB_SAVE	"INSERT INTO QUOTES (EPOCH,NAME,CHANNEL,LINE) VALUES("\
-			"%Q,%Q,%Q,%Q);"
+			"%Q,%Q,%Q,%Q)"
 #define LDB_CREATE	"CREATE TABLE IF NOT EXISTS LASTSEEN ("\
 			"ID INTEGER PRIMARY KEY, "\
 			"EPOCH INTEGER NOT NULL, "\
 			"NAME TEXT NOT NULL UNIQUE, "\
 			"CHANNEL TEXT NOT NULL, "\
-			"LINE TEXT NOT NULL);"
+			"LINE TEXT NOT NULL)"
 #define LDB_SAVE	"INSERT INTO LASTSEEN (EPOCH,NAME,CHANNEL,LINE)"\
-			"VALUES(%Q,%Q,%Q,%Q);"
+			"VALUES(%Q,%Q,%Q,%Q)"
 /* helper macro */
 #define min(x,y)	((x)<(y))?(x):(y)
 /* the quote database */
@@ -194,9 +194,11 @@ int qconv( const char *old, const char *new )
 	puts("Migrating OpenPONIKO 2.0 quotes database...");
 	char l[4096];
 	int i = 1;
+	sqlite3_exec(quotedb,"BEGIN TRANSACTION",NULL,NULL,NULL);
 	while ( !feof(o) )
 		if ( qparse(fgets(l,4095,o),i++) )
 			break;
+	sqlite3_exec(quotedb,"END TRANSACTION",NULL,NULL,NULL);
 	putchar('\n');
 	return qdb_quit()||(fclose(o)&0);
 }
@@ -211,9 +213,11 @@ int rconv( const char *old, const char *new )
 	puts("Migrating OpenPONIKO 2.0 lastseen database...");
 	char l[4096];
 	int i = 1;
+	sqlite3_exec(lseendb,"BEGIN TRANSACTION",NULL,NULL,NULL);
 	while ( !feof(o) )
 		if ( rparse(fgets(l,4095,o),i++) )
 			break;
+	sqlite3_exec(lseendb,"END TRANSACTION",NULL,NULL,NULL);
 	putchar('\n');
 	return mdb_quit()||(fclose(o)&0);
 }

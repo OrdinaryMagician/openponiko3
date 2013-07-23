@@ -5,6 +5,4 @@ Of course OpenPONIKO 3.0 herself deals with this properly.
 
 Legacy registry does contain channel data, though.
 
-It is recommended to have the destination output saved in tmpfs, for maximum speed.
-
 Please ignore the segfault when finishing, it's harmless.
