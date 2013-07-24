@@ -17,7 +17,7 @@
 #include <netdb.h>
 #include <signal.h>
 /* shoutbot variables (all on by default) */
-char botflags = 0xFF;
+unsigned char botflags = 0xFF;
 /* other flags */
 char active = 0;
 char autojoined = 0;

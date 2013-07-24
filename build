@@ -7,29 +7,51 @@ LFLAGS="$(pkg-config --libs sqlite3) $(pkg-config --libs yajl) \
 NAME="poniko3"
 SOURCES=( src/*.c )
 SOURCESO=${SOURCES//%.c/.o}
-CC=${CC:-clang}
-case $1 in
- clean)
-  for f in ${SOURCES}
+CC="${CC:-clang}"
+RM="rm"
+aos_compile()
+{
+ [ -e "$2" ] &&
+  [ $(stat -c %Y "$1") -le $(stat -c %Y "$2") ] &&
+  return true
+ CHANGED=1
+ echo -e "\e[1;32m[CC]\e[0m" $(basename "$1") "->" $(basename "$2")
+ ${CC} ${=CFLAGS} -c -o "$2" "$1"
+ return $?
+}
+aos_clean()
+{
+ [ ! -e "$1" ] &&
+  return true
+ CHANGED=1
+ echo -e "\e[1;32m[RM]\e[0m" $(basename "$1")
+ ${RM} "$1"
+ return $?
+}
+aos_link()
+{
+ [ ${CHANGED} -eq 0 ] &&
+  echo "\e[1;32mEverything is already up to date.\e[0m" &&
+  exit 0
+ echo -e "\e[1;32m[CC]\e[0m" ${NAME}
+ ${CC} ${=LFLAGS} -o "${NAME}" ${=SOURCESO}
+ return $?
+}
+CHANGED=0
+if [[ "$1" == "clean" ]]
+ then
+  for f in "${SOURCES[@]}"
    do
-    f2=${f/%.c/.o}
-    if [[ -e "${f2}" ]]
-     then
-      echo -e "\e[1;32m[RM]\e[0m $(basename ${f2})"
-      rm ${f2}
-    fi
+    aos_clean "${f/%.c/.o}"
    done
-  ;;
- *)
-   for f in ${SOURCES}
-    do
-     f2=${f/%.c/.o}
-     echo -e "\e[1;32m[OBJ]\e[0m $(basename ${f}) -> $(basename ${f2})"
-     $CC ${=CFLAGS} -c -o ${f2} ${f}
-    done
-   echo -e "\e[1;32m[BIN]\e[0m ${NAME}"
-   $CC ${=LFLAGS} -o ${NAME} ${=SOURCESO}
-   strip -s ${NAME}
-  ;;
-esac
-exit 0
+  [ ${CHANGED} -eq 0 ] &&
+   echo "\e[1;32mNothing to clean.\e[0m"
+  exit 0
+ fi
+for f in "${SOURCES[@]}"
+ do
+  ! aos_compile "${f}" "${f/%.c/.o}" &&
+   echo -e "\e[1;31mErrors occured when building\e[0m" >&2 &&
+   exit 1
+ done
+aos_link
