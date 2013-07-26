@@ -25,6 +25,14 @@ int shout_quit( void );
 void shout_tidy( void );
 /* get a random quote */
 int shout_get( void );
+/* count all */
+int shout_countall( long long *to );
+/* count key */
+int shout_countkey( const char *k, long long *to );
+/* count channel */
+int shout_countchan( const char *c, long long *to );
+/* count name */
+int shout_countname( const char *n, long long *to );
 /* get quote by key */
 int shout_get_key( const char *k, quote_t *where );
 /* save a new quote */

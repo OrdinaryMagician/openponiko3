@@ -58,17 +58,14 @@ void shout_tidy( void )
 /* quote get internal */
 static int shout_get_cl( void *to, int argc, char **argv, char **coln )
 {
+	/* silence warnings */
+	coln = 0;
 	/* where to save? */
 	quote_t *sq = (quote_t*)to;
-	/* first sanity check */
+	/* sanity check */
 	if ( argc != 5 )
-		return bail("shout_get_cl: failed sanity check #1\n");
-	/* second sanity check */
-	if ( strcmp(coln[0],"ID") || strcmp(coln[1],"EPOCH")
-		|| strcmp(coln[2],"NAME") || strcmp(coln[3],"CHANNEL")
-		|| strcmp(coln[4],"LINE") )
-		return bail("shout_get_cl: failed sanity check #2\n");
-	if ( sq )
+		return bail("shout_get_cl: failed sanity check\n");
+	if ( sq && argv )
 	{
 		memset(sq,0,sizeof(quote_t));
 		sq->id = atoll(argv[0]);
@@ -79,11 +76,68 @@ static int shout_get_cl( void *to, int argc, char **argv, char **coln )
 	}
 	return 0;
 }
+/* counter internal */
+static int shout_get_cn( void *to, int argc, char **argv, char **coln )
+{
+	/* silence warnings */
+	coln = 0;
+	/* where to save? */
+	long long *cn = (long long*)to;
+	/* sanity check */
+	if ( argc != 1 )
+		return bail("shout_get_cn: failed sanity check\n");
+	if ( cn )
+		*cn = argv?atoll(argv[0]):-1;
+	return 0;
+}
 /* get a random quote */
 int shout_get( void )
 {
 	if ( sqlite3_exec(quotedb,QDB_SELECTRAND,shout_get_cl,&shout_q,NULL) )
 		return bail("shoutbot error: %s\n",sqlite3_errmsg(quotedb));
+	return 0;
+}
+/* count all */
+int shout_countall( long long *to )
+{
+	if ( sqlite3_exec(quotedb,QDB_COUNTQUOTES,shout_get_cn,to,NULL) )
+		return bail("shoutbot error: %s\n",sqlite3_errmsg(quotedb));
+	return 0;
+}
+/* count key */
+int shout_countkey( const char *k, long long *to )
+{
+	char *fmtsav = sqlite3_mprintf(QDB_COUNTLINE,k);
+	if ( sqlite3_exec(quotedb,fmtsav,shout_get_cn,to,NULL) )
+	{
+		sqlite3_free(fmtsav);
+		return bail("shoutbot error: %s\n",sqlite3_errmsg(quotedb));
+	}
+	sqlite3_free(fmtsav);
+	return 0;
+}
+/* count channel */
+int shout_countchan( const char *c, long long *to )
+{
+	char *fmtsav = sqlite3_mprintf(QDB_COUNTCHAN,c);
+	if ( sqlite3_exec(quotedb,fmtsav,shout_get_cn,to,NULL) )
+	{
+		sqlite3_free(fmtsav);
+		return bail("shoutbot error: %s\n",sqlite3_errmsg(quotedb));
+	}
+	sqlite3_free(fmtsav);
+	return 0;
+}
+/* count name */
+int shout_countname( const char *n, long long *to )
+{
+	char *fmtsav = sqlite3_mprintf(QDB_COUNTNAME,n);
+	if ( sqlite3_exec(quotedb,fmtsav,shout_get_cn,to,NULL) )
+	{
+		sqlite3_free(fmtsav);
+		return bail("shoutbot error: %s\n",sqlite3_errmsg(quotedb));
+	}
+	sqlite3_free(fmtsav);
 	return 0;
 }
 /* get quote by key */
