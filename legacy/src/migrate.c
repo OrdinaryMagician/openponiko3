@@ -75,7 +75,7 @@ int shout_save( char *e, char *u, char *c, char *l )
 	if ( sqlite3_exec(quotedb,fmtsav,NULL,NULL,NULL) )
 	{
 		sqlite3_free(fmtsav);
-		return bail("qconv: %s\n",sqlite3_errmsg(quotedb));
+		return bail("\nqconv: %s\n",sqlite3_errmsg(quotedb));
 	}
 	sqlite3_free(fmtsav);
 	return 0;
@@ -87,7 +87,7 @@ int seen_save( char *e, char *u, char *c, char *l )
 	if ( sqlite3_exec(lseendb,fmtsav,NULL,NULL,NULL) )
 	{
 		sqlite3_free(fmtsav);
-		return bail("mconv: %s\n",sqlite3_errmsg(lseendb));
+		return bail("\nmconv: %s\n",sqlite3_errmsg(lseendb));
 	}
 	sqlite3_free(fmtsav);
 	return 0;
@@ -95,6 +95,10 @@ int seen_save( char *e, char *u, char *c, char *l )
 /* parse and save legacy quote */
 int qparse( char *l, int ln )
 {
+	char *ol = l;
+	/* check for EOF or error */
+	if ( !l )
+		return 1;
 	/* read epoch */
 	if ( *l != '[' )
 		return bail("\nqparse: parse error at line %d: "
@@ -129,12 +133,16 @@ int qparse( char *l, int ln )
 	shout_save(epochstr,namestr,"UNKNOWN",linestr);
 	printf("\rParsed %d lines.",ln);
 	fflush(stdout);
-	memset(l,0,4096);
+	memset(ol,0,4096);
 	return 0;
 }
 /* parse and save legacy lastseen */
 int rparse( char *l, int ln )
 {
+	char *ol = l;
+	/* check for EOF or error */
+	if ( !l )
+		return 1;
 	/* read epoch */
 	if ( *l != '[' )
 		return bail("\nrparse: parse error at line %d: "
@@ -180,7 +188,7 @@ int rparse( char *l, int ln )
 	seen_save(epochstr,namestr,chanstr,linestr);
 	printf("\rParsed %d lines.",ln);
 	fflush(stdout);
-	memset(l,0,4096);
+	memset(ol,0,4096);
 	return 0;
 }
 /* convert quotes */
@@ -195,9 +203,7 @@ int qconv( const char *old, const char *new )
 	char l[4096];
 	int i = 1;
 	sqlite3_exec(quotedb,"BEGIN TRANSACTION",NULL,NULL,NULL);
-	while ( !feof(o) )
-		if ( qparse(fgets(l,4095,o),i++) )
-			break;
+	while ( !qparse(fgets(l,4095,o),i++) );
 	sqlite3_exec(quotedb,"END TRANSACTION",NULL,NULL,NULL);
 	putchar('\n');
 	return qdb_quit()||(fclose(o)&0);
@@ -211,12 +217,10 @@ int rconv( const char *old, const char *new )
 	if ( mdb_init(new) )
 		return (fclose(o)&0)+1;
 	puts("Migrating OpenPONIKO 2.0 lastseen database...");
-	char l[4096];
+	char l[4096] = {0};
 	int i = 1;
 	sqlite3_exec(lseendb,"BEGIN TRANSACTION",NULL,NULL,NULL);
-	while ( !feof(o) )
-		if ( rparse(fgets(l,4095,o),i++) )
-			break;
+	while ( !rparse(fgets(l,4095,o),i++) );
 	sqlite3_exec(lseendb,"END TRANSACTION",NULL,NULL,NULL);
 	putchar('\n');
 	return mdb_quit()||(fclose(o)&0);
