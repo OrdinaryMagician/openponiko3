@@ -95,7 +95,6 @@ int seen_save( char *e, char *u, char *c, char *l )
 /* parse and save legacy quote */
 int qparse( char *l, int ln )
 {
-	char *ol = l;
 	/* check for EOF or error */
 	if ( !l )
 		return 1;
@@ -133,13 +132,11 @@ int qparse( char *l, int ln )
 	shout_save(epochstr,namestr,"UNKNOWN",linestr);
 	printf("\rParsed %d lines.",ln);
 	fflush(stdout);
-	memset(ol,0,4096);
 	return 0;
 }
 /* parse and save legacy lastseen */
 int rparse( char *l, int ln )
 {
-	char *ol = l;
 	/* check for EOF or error */
 	if ( !l )
 		return 1;
@@ -188,7 +185,6 @@ int rparse( char *l, int ln )
 	seen_save(epochstr,namestr,chanstr,linestr);
 	printf("\rParsed %d lines.",ln);
 	fflush(stdout);
-	memset(ol,0,4096);
 	return 0;
 }
 /* convert quotes */
@@ -200,7 +196,7 @@ int qconv( const char *old, const char *new )
 	if ( qdb_init(new) )
 		return (fclose(o)&0)+1;
 	puts("Migrating OpenPONIKO 2.0 quotes database...");
-	char l[4096];
+	char l[4096] = {0};
 	int i = 1;
 	sqlite3_exec(quotedb,"BEGIN TRANSACTION",NULL,NULL,NULL);
 	while ( !qparse(fgets(l,4095,o),i++) );
