@@ -4,8 +4,6 @@
 	Part of OpenPONIKO 3.0, the ultimate CAPS LOCK bot.
 	Released under the MIT License.
 */
-#ifndef IRCBASE_H
-#define IRCBASE_H
 /* shoutbot flags */
 #define BOT_SHOUT  0x01 /* can we shout? */
 #define BOT_RECORD 0x02 /* can we save shouts? */
@@ -31,4 +29,3 @@ int ircopen( void );
 int ircclose( void );
 /* process irc connection */
 void process( void );
-#endif

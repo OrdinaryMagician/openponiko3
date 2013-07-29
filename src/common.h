@@ -4,16 +4,8 @@
 	Part of OpenPONIKO 3.0, the ultimate CAPS LOCK bot.
 	Released under the MIT License.
 */
-#ifndef COMMON_H
-#define COMMON_H
-/* needed for some stuff */
-#define _BSD_SOURCE
 /* external code */
-#include <stdio.h>
-#include <unistd.h>
-#include <time.h>
 /* error out */
 int bail( const char *, ... );
 /* timestamp */
 void ptime( const char *fmt, time_t *t );
-#endif

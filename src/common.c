@@ -4,8 +4,9 @@
 	Part of OpenPONIKO 3.0, the ultimate CAPS LOCK bot.
 	Released under the MIT License.
 */
-#include "common.h"
 #include <stdarg.h>
+#include <stdio.h>
+#include <time.h>
 /* error out */
 int bail( const char *m, ... )
 {

@@ -4,11 +4,13 @@
 	Part of OpenPONIKO 3.0, the ultimate CAPS LOCK bot.
 	Released under the MIT License.
 */
-#include "common.h"
-#include "ponikocfg.h"
 #include <string.h>
-#include <errno.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
+#include "common.h"
+#include <errno.h>
+#include "ponikocfg.h"
 /* helper */
 static void readval( const char *from, const char *val, char *to )
 {

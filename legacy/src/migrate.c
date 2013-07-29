@@ -1,10 +1,8 @@
 #define _BSD_SOURCE
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <errno.h>
-#include <string.h>
 #include <sqlite3.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
 /* SQL stuff */
 #define QDB_CREATE	"CREATE TABLE IF NOT EXISTS QUOTES ("\
 			"ID INTEGER PRIMARY KEY, "\

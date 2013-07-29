@@ -4,11 +4,12 @@
 	Part of OpenPONIKO 3.0, the ultimate CAPS LOCK bot.
 	Released under the MIT License.
 */
-#include "common.h"
-#include "shoutbot.h"
 #include <sqlite3.h>
-#include <stdlib.h>
+#include "shoutbot.h"
 #include <string.h>
+#include <stdlib.h>
+#include <time.h>
+#include "common.h"
 /* SQL stuff */
 #define QDB_CREATE	"CREATE TABLE IF NOT EXISTS QUOTES ("\
 			"ID INTEGER PRIMARY KEY, "\

@@ -4,10 +4,12 @@
 	Part of OpenPONIKO 3.0, the ultimate CAPS LOCK bot.
 	Released under the MIT License.
 */
+#include <stdio.h>
+#include "shoutbot.h"
+#include <time.h>
 #include "common.h"
 #include "ponikocfg.h"
 #include "ircbase.h"
-#include "shoutbot.h"
 int main( void )
 {
 	/* greeting */

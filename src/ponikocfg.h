@@ -4,8 +4,6 @@
 	Part of OpenPONIKO 3.0, the ultimate CAPS LOCK bot.
 	Released under the MIT License.
 */
-#ifndef PONIKOCFG_H
-#define PONIKOCFG_H
 typedef struct
 {
 	char server[256];
@@ -20,4 +18,3 @@ typedef struct
 config_t cfg;
 /* loads user config */
 int loadcfg( void );
-#endif

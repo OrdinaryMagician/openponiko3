@@ -4,8 +4,6 @@
 	Part of OpenPONIKO 3.0, the ultimate CAPS LOCK bot.
 	Released under the MIT License.
 */
-#ifndef SHOUTBOT_H
-#define SHOUTBOT_H
 /* a quote */
 typedef struct
 {
@@ -37,4 +35,3 @@ int shout_countname( const char *n, long long *to );
 int shout_get_key( const char *k, quote_t *where );
 /* save a new quote */
 int shout_save( char *u, char *c, char *l );
-#endif

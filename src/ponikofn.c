@@ -4,13 +4,14 @@
 	Part of OpenPONIKO 3.0, the ultimate CAPS LOCK bot.
 	Released under the MIT License.
 */
-#include "common.h"
-#include "ircbase.h"
-#include "ponikofn.h"
-#include "ponikocfg.h"
-#include "shoutbot.h"
-#include <string.h>
 #include <time.h>
+#include <string.h>
+#include "ponikocfg.h"
+#include "ircbase.h"
+#include "shoutbot.h"
+#include "ponikofn.h"
+#include <strings.h>
+#include <stdio.h>
 /* internal vars */
 static time_t laststamp = 0;
 static int spamthreshold = 5;

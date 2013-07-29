@@ -4,18 +4,20 @@
 	Part of OpenPONIKO 3.0, the ultimate CAPS LOCK bot.
 	Released under the MIT License.
 */
-#include "common.h"
-#include "ircbase.h"
-#include "ponikofn.h"
-#include "ponikocfg.h"
-#include <stdlib.h>
-#include <string.h>
+#define _BSD_SOURCE
+#include <netinet/in.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
+#include "common.h"
+#include <strings.h>
 #include <errno.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
+#include <stdlib.h>
+#include "ponikocfg.h"
 #include <netdb.h>
 #include <signal.h>
+#include <unistd.h>
+#include "ponikofn.h"
 /* shoutbot variables (all on by default) */
 unsigned char botflags = 0xFF;
 /* other flags */
