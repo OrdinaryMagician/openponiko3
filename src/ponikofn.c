@@ -210,6 +210,35 @@ static int seen( int sock, char **user, char *msg, char *replyto )
 		":%s, %s was last seen here at %s. %s last said: %s",
 			replyto,user[0],last.name,timestr,last.name,last.line);
 }
+static int shout( int sock, char **user, char *msg, char *replyto )
+{
+	msg = 0;
+	if ( strcmp(user[2],cfg.owner) )
+		return ircsend(sock,"PRIVMSG %s "
+			":Warning: %s is not in the sudoers file, "
+			"this incident will be reported",replyto,user[0]);
+	if ( botflags&BOT_SHOUT )
+		return ircsend(sock,"PRIVMSG %s "
+			":I believe I'm already loud enough, thank you.",
+			replyto);
+	botflags |= BOT_SHOUT;
+	return ircsend(sock,"PRIVMSG %s "
+		":\001ACTION CRUISE CONTROL ENGAGED\001",replyto);
+}
+static int noshout( int sock, char **user, char *msg, char *replyto )
+{
+	msg = 0;
+	if ( strcmp(user[2],cfg.owner) )
+		return ircsend(sock,"PRIVMSG %s "
+			":Warning: %s is not in the sudoers file, "
+			"this incident will be reported",replyto,user[0]);
+	if ( !(botflags&BOT_SHOUT) )
+		return ircsend(sock,"PRIVMSG %s "
+			":Hey! You already told me to not shout!",replyto);
+	botflags &= ~BOT_SHOUT;
+	return ircsend(sock,"PRIVMSG %s "
+		":\001ACTION CRUISE CONTROL DISENGAGED\001",replyto);
+}
 /* builtin lists */
 /*
     * rawcommand: execute raw IRC command
@@ -225,7 +254,7 @@ static int seen( int sock, char **user, char *msg, char *replyto )
     * threshold: set spam detection threshold
     - (un)ban: add or remove user from blacklist
     - (no)save: toggle quote saving
-    - (no)shout: toggle shouting
+    * (no)shout: toggle shouting
     - (no)autoban: toggle automatic blacklisting after 3 spam triggers
     * seen: when a user was last seen and what did they last say
     - whereis: check which channels a user is on
@@ -245,6 +274,8 @@ char *builtin_names[] =
 	"recall",
 	"threshold",
 	"seen",
+	"shout",
+	"noshout",
 	NULL,
 };
 builtinfn_t builtin_funcs[] =
@@ -260,6 +291,8 @@ builtinfn_t builtin_funcs[] =
 	recall,
 	threshold,
 	seen,
+	shout,
+	noshout,
 	NULL,
 };
 /* spam protector */
