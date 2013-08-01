@@ -9,6 +9,7 @@
 #include "ponikocfg.h"
 #include "ircbase.h"
 #include "shoutbot.h"
+#include "lastseen.h"
 #include "ponikofn.h"
 #include <strings.h>
 #include <stdio.h>
@@ -73,8 +74,8 @@ static int tidy( int sock, char **user, char *msg, char *replyto )
 			":Warning: %s is not in the sudoers file, "
 			"this incident will be reported",replyto,user[0]);
 	shout_tidy();
-	/* TODO
 	lseen_tidy();
+	/* TODO
 	blist_tidy();
 	memos_tidy();
 	*/
@@ -184,6 +185,31 @@ static int threshold( int sock, char **user, char *msg, char *replyto )
 			":Spam protection disabled.",
 			replyto,spamthreshold);
 }
+static int seen( int sock, char **user, char *msg, char *replyto )
+{
+	char *parm = strchr(msg,' ');
+	if ( !parm || !(++parm) )
+		return ircsend(sock,"NOTICE %s "
+			":no parameter specified",user[0]);
+	if ( !strcmp(parm,user[0]) )
+		return ircsend(sock,"PRIVMSG %s "
+			":%s, you're right there.",replyto,user[0]);
+	if ( !strcmp(parm,cfg.nick) )
+		return ircsend(sock,"PRIVMSG %s "
+			":%s, I'm right here.",replyto,user[0]);
+	lseen_t last = {0,0,{0},{0},{0}};
+	lseen_get(parm,replyto,&last);
+	if ( !last.id )
+		return ircsend(sock,"PRIVMSG %s "
+			":%s, I never heard of a user called %s in here.",
+			replyto,user[0],parm);
+	char timestr[256];
+	strftime(timestr,256,"%a %d/%m/%Y %H:%M:%S",
+		localtime((time_t*)&last.epoch));
+	return ircsend(sock,"PRIVMSG %s "
+		":%s, %s was last seen here at %s. %s last said: %s",
+			replyto,user[0],last.name,timestr,last.name,last.line);
+}
 /* builtin lists */
 /*
     * rawcommand: execute raw IRC command
@@ -201,7 +227,7 @@ static int threshold( int sock, char **user, char *msg, char *replyto )
     - (no)save: toggle quote saving
     - (no)shout: toggle shouting
     - (no)autoban: toggle automatic blacklisting after 3 spam triggers
-    - seen: when a user was last seen and what did they last say
+    * seen: when a user was last seen and what did they last say
     - whereis: check which channels a user is on
     * poke: force shout
     * recall: repeat last shout
@@ -218,6 +244,7 @@ char *builtin_names[] =
 	"poke",
 	"recall",
 	"threshold",
+	"seen",
 	NULL,
 };
 builtinfn_t builtin_funcs[] =
@@ -232,6 +259,7 @@ builtinfn_t builtin_funcs[] =
 	poke,
 	recall,
 	threshold,
+	seen,
 	NULL,
 };
 /* spam protector */
@@ -291,5 +319,6 @@ skipcmd:
 		shout_save(user[0],replyto,msg);
 skipshout:
 skipall:
+	lseen_save(user[0],replyto,msg);
 	return 0;
 }

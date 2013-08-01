@@ -30,7 +30,7 @@
 /* the quote database */
 sqlite3 *quotedb;
 /* currently loaded quote */
-quote_t shout_q = {0,0,{0},{0},{0},};
+quote_t shout_q = {0,0,{0},{0},{0}};
 /* start up */
 int shout_init( void )
 {

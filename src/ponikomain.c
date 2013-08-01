@@ -6,6 +6,7 @@
 */
 #include <stdio.h>
 #include "shoutbot.h"
+#include "lastseen.h"
 #include <time.h>
 #include "common.h"
 #include "ponikocfg.h"
@@ -17,6 +18,9 @@ int main( void )
 	/* shoutbot */
 	if ( shout_init() )
 		return bail("Couldn't init shoutbot core\n");
+	/* activity */
+	if ( lseen_init() )
+		return bail("Couldn't init lastseen core\n");
 	/* load config */
 	if ( loadcfg() )
 		return bail("Couldn't load configuration\n");
@@ -24,5 +28,5 @@ int main( void )
 		return bail("Couldn't connect to default irc server\n");
 	while ( active )
 		process();
-	return (ircclose()||shout_quit())!=0;
+	return (ircclose()||shout_quit()||lseen_quit())!=0;
 }
