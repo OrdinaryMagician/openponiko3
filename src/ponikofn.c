@@ -12,6 +12,7 @@
 #include "ponikofn.h"
 #include <strings.h>
 #include <stdio.h>
+#include <stdlib.h>
 /* internal vars */
 static time_t laststamp = 0;
 static int spamthreshold = 5;
@@ -159,6 +160,30 @@ static int recall( int sock, char **user, char *msg, char *replyto )
 	return ircsend(sock,"PRIVMSG %s "
 		":%s, my last shout was: %s",replyto,user[0],shout_q.line);
 }
+static int threshold( int sock, char **user, char *msg, char *replyto )
+{
+	char *parm = strchr(msg,' ');
+	if ( !parm )
+		return ircsend(sock,"PRIVMSG %s "
+			":Current spam protection threshold is %d seconds.",
+			replyto,spamthreshold);
+	if ( strcmp(user[2],cfg.owner) )
+		return ircsend(sock,"PRIVMSG %s "
+			":Warning: %s is not in the sudoers file, "
+			"this incident will be reported",replyto,user[0]);
+	spamthreshold = atoi(parm+1);
+	if ( spamthreshold <= 0 )
+		botflags &= ~BOT_DELAY;
+	else
+		botflags |= BOT_DELAY;
+	return (botflags&BOT_DELAY)
+		?ircsend(sock,"PRIVMSG %s "
+			":Spam protection threshold set to %d seconds.",
+			replyto,spamthreshold)
+		:ircsend(sock,"PRIVMSG %s "
+			":Spam protection disabled.",
+			replyto,spamthreshold);
+}
 /* builtin lists */
 /*
     * rawcommand: execute raw IRC command
@@ -171,7 +196,7 @@ static int recall( int sock, char **user, char *msg, char *replyto )
     * countall: count all quotes
     * countchan: count all quotes on a channel
     * countkey: count quotes by case insensitive key
-    - threshold: set spam detection threshold
+    * threshold: set spam detection threshold
     - (un)ban: add or remove user from blacklist
     - (no)save: toggle quote saving
     - (no)shout: toggle shouting
@@ -192,6 +217,7 @@ char *builtin_names[] =
 	"count",
 	"poke",
 	"recall",
+	"threshold",
 	NULL,
 };
 builtinfn_t builtin_funcs[] =
@@ -205,6 +231,7 @@ builtinfn_t builtin_funcs[] =
 	count,
 	poke,
 	recall,
+	threshold,
 	NULL,
 };
 /* spam protector */
@@ -247,7 +274,7 @@ int parsemesg( int sock, char **user, char *msg, char *replyto )
 		len = strlen(builtin_names[i]);
 		if ( strncasecmp(msg+1,builtin_names[i],len) )
 			continue;
-		if ( flood_detected() )
+		if ( strcmp(user[2],cfg.owner) && flood_detected() )
 			goto skipall;
 		return builtin_funcs[i](sock,user,msg+1,replyto);
 	}
@@ -255,7 +282,7 @@ skipcmd:
 	if ( strpbrk(msg,"abcdefghijklmnopqrstuvwxyz") || (strlen(msg) < 10)
 	     || !(botflags&BOT_SHOUT) )
 		goto skipshout;
-	if ( flood_detected() )
+	if ( strcmp(user[2],cfg.owner) && flood_detected() )
 		goto skipall;
 	shout_get();
 	if ( shout_q.id )
