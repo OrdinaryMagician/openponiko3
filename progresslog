@@ -1,0 +1,29 @@
+Legend:
+- To do
+X Done
+P Partial
+F Failed
+C Currently in progress
+
+Initial stage:
+  X Start project
+  F Full modular system
+  X IRC bot skeleton
+Alpha stage:
+  X Message parsing
+  X Legacy converter
+  X sqlite3 interfaces
+  C Built-in commands
+  C Poniko functionality (shoutbot, url handler, memos, registry)
+Beta stage:
+  - True Unicode support
+  - Codepage conversion
+  - Support for some website APIs
+  - Ponikoscript
+  - Multi-server support
+  - Handling of nick changes
+  - Logging system
+  - Better proxy interface
+Post-release:
+  - Documentation
+  - Run Poniko 24/7 on a server

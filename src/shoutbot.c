@@ -26,7 +26,7 @@
 #define QDB_COUNTCHAN	"SELECT COUNT(*) FROM QUOTES WHERE CHANNEL=%Q"
 #define QDB_COUNTNAME	"SELECT COUNT(*) FROM QUOTES WHERE NAME=%Q"
 #define QDB_SAVE	"INSERT INTO QUOTES (EPOCH,NAME,CHANNEL,LINE) VALUES("\
-			"date('now'),%Q,%Q,%Q)"
+			"%ld,%Q,%Q,%Q)"
 /* the quote database */
 sqlite3 *quotedb;
 /* currently loaded quote */
@@ -156,7 +156,7 @@ int shout_get_key( const char *k, quote_t *where )
 /* save a new quote */
 int shout_save( char *u, char *c, char *l )
 {
-	char *fmtsav = sqlite3_mprintf(QDB_SAVE,u,c,l);
+	char *fmtsav = sqlite3_mprintf(QDB_SAVE,time(NULL),u,c,l);
 	if ( sqlite3_exec(quotedb,fmtsav,NULL,NULL,NULL) )
 	{
 		sqlite3_free(fmtsav);

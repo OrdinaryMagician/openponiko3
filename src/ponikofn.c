@@ -37,7 +37,8 @@ static int who( int sock, char **user, char *msg, char *replyto )
 	{
 		if ( !shout_q.id )
 			return ircsend(sock,"PRIVMSG %s "
-				":%s, I haven't shouted yet :/",replyto,user[0]);
+				":%s, I haven't shouted yet :/",replyto,
+				user[0]);
 		char timestr[256];
 		strftime(timestr,256,"%a %d/%m/%Y %H:%M:%S",
 			localtime((time_t*)&shout_q.epoch));
@@ -299,7 +300,7 @@ builtinfn_t builtin_funcs[] =
 static int flood_detected( void )
 {
 	time_t current = time(NULL);
-	int ret = (botflags&BOT_DELAY) && ((current-laststamp) < spamthreshold);
+	int ret = (botflags&BOT_DELAY)&&((current-laststamp)<spamthreshold);
 	laststamp = current;
 	return ret;
 }
@@ -326,7 +327,8 @@ int parsemesg( int sock, char **user, char *msg, char *replyto )
 	}
 	if ( !strcasecmp(msg,"\001VERSION\001") )
 		return ircsend(sock,"NOTICE %s :%s",replyto,
-			"OpenPONIKO 3.0 - Compiled on " __DATE__ " " __TIME__)&0;
+			"OpenPONIKO 3.0 - Compiled on " __DATE__ " " __TIME__)
+			&0;
 	if ( *msg != '!' )
 		goto skipcmd;
 	int i, len;
@@ -340,16 +342,17 @@ int parsemesg( int sock, char **user, char *msg, char *replyto )
 		return builtin_funcs[i](sock,user,msg+1,replyto);
 	}
 skipcmd:
-	if ( strpbrk(msg,"abcdefghijklmnopqrstuvwxyz") || (strlen(msg) < 10)
-	     || !(botflags&BOT_SHOUT) )
+	if ( strpbrk(msg,"abcdefghijklmnopqrstuvwxyz") || (strlen(msg) < 10) )
+		goto skipshout;
+	if ( botflags&BOT_RECORD )
+		shout_save(user[0],replyto,msg);
+	if ( !(botflags&BOT_SHOUT) )
 		goto skipshout;
 	if ( strcmp(user[2],cfg.owner) && flood_detected() )
 		goto skipall;
 	shout_get();
 	if ( shout_q.id )
 		ircsend(sock,"PRIVMSG %s :%s",replyto,shout_q.line);
-	if ( botflags&BOT_RECORD )
-		shout_save(user[0],replyto,msg);
 skipshout:
 skipall:
 	lseen_save(user[0],replyto,msg);

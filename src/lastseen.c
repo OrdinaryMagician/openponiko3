@@ -20,10 +20,10 @@
 #define LDB_VACUUM	"VACUUM"
 #define LDB_SELECT	"SELECT * FROM LASTSEEN WHERE NAME=%Q AND CHANNEL=%Q"\
 			"LIMIT 1"
-#define LDB_UPDATE	"UPDATE LASTSEEN SET EPOCH=date('now'),LINE=%Q"\
+#define LDB_UPDATE	"UPDATE LASTSEEN SET EPOCH=%ld,LINE=%Q"\
 			"WHERE NAME=%Q AND CHANNEL=%Q"
 #define LDB_INSERT	"INSERT INTO LASTSEEN (EPOCH,NAME,CHANNEL,LINE)"\
-			"VALUES(date('now'),%Q,%Q,%Q)"
+			"VALUES(%ld,%Q,%Q,%Q)"
 /* the lastseen database */
 sqlite3 *lseendb;
 /* start up */
@@ -90,8 +90,8 @@ int lseen_save( char *u, char *c, char *l )
 	lseen_t exists = {0,0,{0},{0},{0}};
 	lseen_get(u,c,&exists);
 	char *fmtsav = exists.id
-		?sqlite3_mprintf(LDB_UPDATE,l,u,c)
-		:sqlite3_mprintf(LDB_INSERT,u,c,l);
+		?sqlite3_mprintf(LDB_UPDATE,time(NULL),l,u,c)
+		:sqlite3_mprintf(LDB_INSERT,time(NULL),u,c,l);
 	if ( sqlite3_exec(lseendb,fmtsav,NULL,NULL,NULL) )
 	{
 		sqlite3_free(fmtsav);
