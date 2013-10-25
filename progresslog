@@ -16,14 +16,26 @@ Alpha stage:
   C Built-in commands
   C Poniko functionality (shoutbot, url handler, memos, registry)
 Beta stage:
-  - True Unicode support
-  - Codepage conversion
-  - Support for some website APIs
+  - Pluggable module system using libdl
+     - Separate builtin functions into modules
   - Ponikoscript
+  - True Unicode support
+     - Codepage conversion
+  - Support for commands and url formatting on some sites/services/apis
+     - youtube (search, formatting)
+     - mega (formatting)
+     - yotsuba, 4chan (search, formatting)
+     - gelbooru/danbooru engines (search, formatting)
+     - nodoka, sayachan (search, formatting)
+     - github (search, formatting)
+     - wikipedia (search)
+     - urban dictionary (search)
+     - google (search, translate)
+     - twitter (search, url formatting)
   - Multi-server support
   - Handling of nick changes
   - Logging system
-  - Better proxy interface
 Post-release:
   - Documentation
   - Run Poniko 24/7 on a server
+  - Add statistics pages to server
