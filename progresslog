@@ -31,7 +31,7 @@ Beta stage:
      - wikipedia (search)
      - urban dictionary (search)
      - google (search, translate)
-     - twitter (search, url formatting)
+     - twitter (search, url formatting, twitter bot on @openponiko3)
   - Multi-server support
   - Handling of nick changes
   - Logging system
