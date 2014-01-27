@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include "common.h"
+#include <sys/stat.h>
+#include <stdio.h>
 /* SQL stuff */
 #define LDB_CREATE	"CREATE TABLE IF NOT EXISTS LASTSEEN ("\
 			"ID INTEGER PRIMARY KEY, "\
@@ -26,11 +28,12 @@
 			"VALUES(%ld,%Q,%Q,%Q)"
 /* the lastseen database */
 sqlite3 *lseendb;
+/* lastseen database path */
+char lpath[256];
 /* start up */
 int lseen_init( void )
 {
 	/* generate lseendb path */
-	char lpath[256];
 	strcpy(lpath,getenv("HOME"));
 	strcat(lpath,"/lastseen.db");
 	if ( sqlite3_open(lpath,&lseendb) )
@@ -49,7 +52,13 @@ int lseen_quit( void )
 /* clean up database (vacuum) */
 void lseen_tidy( void )
 {
+	/* no error check for stat, assume lseendb file exists and is usable */
+	struct stat db1,db2;
+	stat(lpath,&db1);
 	sqlite3_exec(lseendb,LDB_VACUUM,NULL,NULL,NULL);
+	stat(lpath,&db2);
+	printf("shoutbot info: vacuum fsize difference for lseendb: %ld\n",
+		db1.st_size-db2.st_size);
 }
 /* lastseen get internal */
 static int lseen_get_cl( void *to, int argc, char **argv, char **coln )

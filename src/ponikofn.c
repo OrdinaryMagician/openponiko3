@@ -81,7 +81,7 @@ static int tidy( int sock, char **user, char *msg, char *replyto )
 	memos_tidy();
 	*/
 	return ircsend(sock,"PRIVMSG %s "
-			":Full database vacuum finished.");
+			":Full database vacuum finished.",replyto);
 }
 static int count( int sock, char **user, char *msg, char *replyto )
 {
@@ -156,7 +156,7 @@ static int recall( int sock, char **user, char *msg, char *replyto )
 {
 	/* silence warnings */
 	msg = 0;
-	if ( shout_q.id )
+	if ( !shout_q.id )
 		return ircsend(sock,"PRIVMSG %s "
 			":%s, I haven't shouted yet :/",replyto,user[0]);
 	return ircsend(sock,"PRIVMSG %s "
@@ -240,13 +240,120 @@ static int noshout( int sock, char **user, char *msg, char *replyto )
 	return ircsend(sock,"PRIVMSG %s "
 		":\001ACTION CRUISE CONTROL DISENGAGED\001",replyto);
 }
+static long long qdel = 0;
+static char ndel[256] = {0};
+static int forget( int sock, char **user, char *msg, char *replyto )
+{
+	char *parm = strchr(msg,' ');
+	if ( !parm || !(++parm) )
+		return ircsend(sock,"NOTICE %s "
+			":no parameter specified",user[0]);
+	if ( strcmp(user[2],cfg.owner) )
+		return ircsend(sock,"PRIVMSG %s "
+			":Warning: %s is not in the sudoers file, "
+			"this incident will be reported",replyto,user[0]);
+	if ( !strcmp(parm,"last") )
+	{
+		if ( !shout_q.id )
+			return ircsend(sock,"PRIVMSG %s "
+				":%s, I haven't shouted yet :/",replyto,
+				user[0]);
+		qdel = shout_q.id;
+		return ircsend(sock,"PRIVMSG %s "
+			":Delete '%s'? say !brainbleach to confirm",replyto,
+			shout_q.line);
+	}
+	quote_t got = {0,0,{0},{0},{0}};
+	shout_get_key(parm,&got);
+	if ( !got.id )
+		return ircsend(sock,"PRIVMSG %s "
+			":No such quote found",replyto);
+	qdel = got.id;
+	return ircsend(sock,"PRIVMSG %s "
+		":Delete '%s'? say !brainbleach to confirm",replyto,
+		got.line);
+	
+}
+static int forgetbyname( int sock, char **user, char *msg, char *replyto )
+{
+	char *parm = strchr(msg,' ');
+	if ( !parm || !(++parm) )
+		return ircsend(sock,"NOTICE %s "
+			":no parameter specified",user[0]);
+	if ( strcmp(user[2],cfg.owner) )
+		return ircsend(sock,"PRIVMSG %s "
+			":Warning: %s is not in the sudoers file, "
+			"this incident will be reported",replyto,user[0]);
+	strncpy(parm,ndel,255);
+	return ircsend(sock,"PRIVMSG %s "
+		":Delete all from '%s'? say !brainbleach to confirm",replyto,
+		parm);
+	
+}
+static int brainbleach( int sock, char **user, char *msg, char *replyto )
+{
+	msg = 0;
+	if ( strcmp(user[2],cfg.owner) )
+		return ircsend(sock,"PRIVMSG %s "
+			":Warning: %s is not in the sudoers file, "
+			"this incident will be reported",replyto,user[0]);
+	if ( !qdel && !(*ndel) )
+		return ircsend(sock,"PRIVMSG %s :What for?",replyto);
+	if ( qdel )
+	{
+		int ret = shout_rmquote(qdel);
+		qdel=0;
+		return (!ret)?ircsend(sock,"PRIVMSG %s "
+			":Quote erased successfully",replyto)
+			:ircsend(sock,"PRIVMSG %s "
+			":Could not erase quote",replyto);
+	}
+	/* assume name */
+	long long num = 0;
+	shout_countname(ndel,&num);
+	int ret = shout_rmuser(ndel);
+	*ndel = 0;
+	return (!ret)?ircsend(sock,"PRIVMSG %s "
+		":Erased %ll quotes",replyto,num)
+		:ircsend(sock,"PRIVMSG %s "
+		":Could not erase quotes",replyto);
+}
+static int save( int sock, char **user, char *msg, char *replyto )
+{
+	msg = 0;
+	if ( strcmp(user[2],cfg.owner) )
+		return ircsend(sock,"PRIVMSG %s "
+			":Warning: %s is not in the sudoers file, "
+			"this incident will be reported",replyto,user[0]);
+	if ( botflags&BOT_RECORD )
+		return ircsend(sock,"PRIVMSG %s "
+			":I'm taking notes here, I swear.",
+			replyto);
+	botflags |= BOT_RECORD;
+	return ircsend(sock,"PRIVMSG %s "
+		":\001ACTION grabs a notebook\001",replyto);
+}
+static int nosave( int sock, char **user, char *msg, char *replyto )
+{
+	msg = 0;
+	if ( strcmp(user[2],cfg.owner) )
+		return ircsend(sock,"PRIVMSG %s "
+			":Warning: %s is not in the sudoers file, "
+			"this incident will be reported",replyto,user[0]);
+	if ( !(botflags&BOT_RECORD) )
+		return ircsend(sock,"PRIVMSG %s "
+			":Sorry, I wasn't paying attention",replyto);
+	botflags &= ~BOT_RECORD;
+	return ircsend(sock,"PRIVMSG %s "
+		":\001ACTION puts the notebook away\001",replyto);
+}
 /* builtin lists */
 /*
     * rawcommand: execute raw IRC command
     * who: print who said which quote ("last" for last shouted)
-    - forget: forget a quote
-    - forgetbyname: forget all quotes from a user
-    - brainbleach: confirm forget
+    * forget: forget a quote
+    * forgetbyname: forget all quotes from a user
+    * brainbleach: confirm forget
     * tidy: clean up and vacuum databases
     * count: count quotes by user
     * countall: count all quotes
@@ -254,7 +361,7 @@ static int noshout( int sock, char **user, char *msg, char *replyto )
     * countkey: count quotes by case insensitive key
     * threshold: set spam detection threshold
     - (un)ban: add or remove user from blacklist
-    - (no)save: toggle quote saving
+    * (no)save: toggle quote saving
     * (no)shout: toggle shouting
     - (no)autoban: toggle automatic blacklisting after 3 spam triggers
     * seen: when a user was last seen and what did they last say
@@ -266,6 +373,9 @@ char *builtin_names[] =
 {
 	"rawcommand",
 	"who",
+	"forget",
+	"forgetbyname",
+	"brainbleach",
 	"tidy",
 	"countall",
 	"countkey",
@@ -275,6 +385,8 @@ char *builtin_names[] =
 	"recall",
 	"threshold",
 	"seen",
+	"save",
+	"nosave",
 	"shout",
 	"noshout",
 	NULL,
@@ -283,6 +395,9 @@ builtinfn_t builtin_funcs[] =
 {
 	rawcmd,
 	who,
+	forget,
+	forgetbyname,
+	brainbleach,
 	tidy,
 	countall,
 	countkey,
@@ -292,6 +407,8 @@ builtinfn_t builtin_funcs[] =
 	recall,
 	threshold,
 	seen,
+	save,
+	nosave,
 	shout,
 	noshout,
 	NULL,

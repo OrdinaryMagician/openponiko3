@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include "common.h"
+#include <sys/stat.h>
+#include <stdio.h>
 /* SQL stuff */
 #define QDB_CREATE	"CREATE TABLE IF NOT EXISTS QUOTES ("\
 			"ID INTEGER PRIMARY KEY, "\
@@ -20,22 +22,26 @@
 #define QDB_VACUUM	"VACUUM"
 #define QDB_SELECTRAND	"SELECT * FROM QUOTES LIMIT 1 OFFSET ("\
 			"SELECT ABS(RANDOM())%(SELECT COUNT(*) FROM QUOTES))"
-#define QDB_SELECTLINE	"SELECT * FROM QUOTES WHERE LINE=%Q LIMIT 1"
+#define QDB_SELECTLINE	"SELECT * FROM QUOTES WHERE LINE=%Q ORDER BY ID DESC "\
+			"LIMIT 1"
 #define QDB_COUNTQUOTES	"SELECT COUNT(*) FROM QUOTES"
 #define QDB_COUNTLINE	"SELECT COUNT(*) FROM QUOTES WHERE LINE LIKE %Q"
 #define QDB_COUNTCHAN	"SELECT COUNT(*) FROM QUOTES WHERE CHANNEL=%Q"
 #define QDB_COUNTNAME	"SELECT COUNT(*) FROM QUOTES WHERE NAME=%Q"
 #define QDB_SAVE	"INSERT INTO QUOTES (EPOCH,NAME,CHANNEL,LINE) VALUES("\
 			"%ld,%Q,%Q,%Q)"
+#define QDB_RM		"DELETE FROM QUOTES WHERE ID=%ld"
+#define QDB_RMUSER	"DELETE FROM QUOTES WHERE NAME=%Q"
 /* the quote database */
 sqlite3 *quotedb;
 /* currently loaded quote */
 quote_t shout_q = {0,0,{0},{0},{0}};
+/* quote database path */
+char qpath[256] = {0};
 /* start up */
 int shout_init( void )
 {
 	/* generate quotedb path */
-	char qpath[256];
 	strcpy(qpath,getenv("HOME"));
 	strcat(qpath,"/quotes.db");
 	if ( sqlite3_open(qpath,&quotedb) )
@@ -54,7 +60,13 @@ int shout_quit( void )
 /* clean up database (vacuum) */
 void shout_tidy( void )
 {
+	/* no error check for stat, assume quotedb file exists and is usable */
+	struct stat db1,db2;
+	stat(qpath,&db1);
 	sqlite3_exec(quotedb,QDB_VACUUM,NULL,NULL,NULL);
+	stat(qpath,&db2);
+	printf("shoutbot info: vacuum fsize difference for quotedb: %ld\n",
+		db1.st_size-db2.st_size);
 }
 /* quote get internal */
 static int shout_get_cl( void *to, int argc, char **argv, char **coln )
@@ -157,6 +169,30 @@ int shout_get_key( const char *k, quote_t *where )
 int shout_save( char *u, char *c, char *l )
 {
 	char *fmtsav = sqlite3_mprintf(QDB_SAVE,time(NULL),u,c,l);
+	if ( sqlite3_exec(quotedb,fmtsav,NULL,NULL,NULL) )
+	{
+		sqlite3_free(fmtsav);
+		return bail("shoutbot error: %s\n",sqlite3_errmsg(quotedb));
+	}
+	sqlite3_free(fmtsav);
+	return 0;
+}
+/* delete a quote */
+int shout_rmquote( long long i )
+{
+	char *fmtsav = sqlite3_mprintf(QDB_RM,i);
+	if ( sqlite3_exec(quotedb,fmtsav,NULL,NULL,NULL) )
+	{
+		sqlite3_free(fmtsav);
+		return bail("shoutbot error: %s\n",sqlite3_errmsg(quotedb));
+	}
+	sqlite3_free(fmtsav);
+	return 0;
+}
+/* delete all quotes from name */
+int shout_rmuser( char *u )
+{
+	char *fmtsav = sqlite3_mprintf(QDB_RMUSER,u);
 	if ( sqlite3_exec(quotedb,fmtsav,NULL,NULL,NULL) )
 	{
 		sqlite3_free(fmtsav);

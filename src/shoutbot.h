@@ -35,3 +35,7 @@ int shout_countname( const char *n, long long *to );
 int shout_get_key( const char *k, quote_t *where );
 /* save a new quote */
 int shout_save( char *u, char *c, char *l );
+/* delete a quote */
+int shout_rmquote( long long i );
+/* delete all quotes from name */
+int shout_rmuser( char *u );
