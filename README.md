@@ -17,7 +17,7 @@ Might run on Windows with some patching.
 
 ## About buildscripts
 OpenPONIKO 3.0 uses an AOS buildscript for compiling and linking.
-It requires Zsh and (by default, unless $CC is overriden) Clang.
+It defaults to Clang unless the CC environment variable is overriden.
 
 There's also a makefile (ew) for those who hate AOS buildscripts.
 (And it seems this is a lot of people)
