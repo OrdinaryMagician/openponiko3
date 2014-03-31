@@ -62,7 +62,7 @@ int ircget( int ssock, char *to, int max )
 		res = recv(ssock,&tmp,1,0);
 		/* connection error, possibly */
 		/* will implement reconnecting later, just quit for now */
-		if ( res < 0 )	
+		if ( res < 0 )
 			return (active=0)-1;
 		if ( res > 0 )
 		{
@@ -91,7 +91,7 @@ int ircopen( void )
 	/* make socket and other data */
 	if ( (sock = socket(PF_INET,SOCK_STREAM,0)) < 0 )
 		bail("ircopen error: %s\n",strerror(errno));
-        memset(&s_in,0,sizeof(struct sockaddr_in));
+	memset(&s_in,0,sizeof(struct sockaddr_in));
 	s_in.sin_family = PF_INET;
 	s_in.sin_port = htons(atoi(cfg.port));
 	if ( (he = gethostbyname(cfg.server)) == NULL )
@@ -152,16 +152,16 @@ void process( void )
 		ircsend(sock,"PONG :%s",av[0]);
 	/* handle quits */
 	else if ( !strcmp(c,"ERROR")
-		  && strstr(av[0],"Closing Link")
-		  && strstr(av[0],"Quit:") )
+		&& strstr(av[0],"Closing Link")
+		&& strstr(av[0],"Quit:") )
 		active = 0;
 	/* check for notices about our vhost */
 	else if ( !strcmp(c,"NOTICE") && !autojoined )
 	{
 		if ( (!strncmp(source,"HostServ!",9)
-		     || !strncmp(source,"NickServ!",9))
-		     && strstr(av[1],"Your vhost of")
-		     && strstr(av[1],"is now activated.") )
+			|| !strncmp(source,"NickServ!",9))
+			&& strstr(av[1],"Your vhost of")
+			&& strstr(av[1],"is now activated.") )
 		{
 			ircsend(sock,"JOIN %s",cfg.chan);
 			autojoined = 1;

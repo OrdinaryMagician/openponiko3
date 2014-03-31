@@ -272,7 +272,6 @@ static int forget( int sock, char **user, char *msg, char *replyto )
 	return ircsend(sock,"PRIVMSG %s "
 		":Delete '%s'? say !brainbleach to confirm",replyto,
 		got.line);
-	
 }
 static int forgetbyname( int sock, char **user, char *msg, char *replyto )
 {
@@ -288,7 +287,6 @@ static int forgetbyname( int sock, char **user, char *msg, char *replyto )
 	return ircsend(sock,"PRIVMSG %s "
 		":Delete all from '%s'? say !brainbleach to confirm",replyto,
 		parm);
-	
 }
 static int brainbleach( int sock, char **user, char *msg, char *replyto )
 {

@@ -221,7 +221,7 @@ int rconv( const char *old, const char *new )
 }
 /* main */
 int main( int argc, char **argv )
-{ 
+{
 	return (argc<4)?bail("usage: %s <qdb|rdb> <old db> <new db>\n",argv[0])
 		:!strcmp(argv[1],"qdb")?qconv(argv[2],argv[3])
 		:!strcmp(argv[1],"rdb")?rconv(argv[2],argv[3])
