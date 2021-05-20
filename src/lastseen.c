@@ -64,7 +64,7 @@ void lseen_tidy( void )
 static int lseen_get_cl( void *to, int argc, char **argv, char **coln )
 {
 	/* silence warnings */
-	coln = 0;
+	(void)coln;
 	/* where to save? */
 	lseen_t *sl = (lseen_t*)to;
 	/* sanity check */

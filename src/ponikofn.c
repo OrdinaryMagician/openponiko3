@@ -69,7 +69,7 @@ static int who( int sock, char **user, char *msg, char *replyto )
 static int tidy( int sock, char **user, char *msg, char *replyto )
 {
 	/* silence warnings */
-	msg = 0;
+	(void)msg;
 	if ( strcmp(user[2],cfg.owner) )
 		return ircsend(sock,"PRIVMSG %s "
 			":Warning: %s is not in the sudoers file, "
@@ -101,8 +101,7 @@ static int count( int sock, char **user, char *msg, char *replyto )
 static int countall( int sock, char **user, char *msg, char *replyto )
 {
 	/* silence warnings */
-	user = 0;
-	msg = 0;
+	(void)user, (void)msg;
 	long long numbered = 0;
 	if ( shout_countall(&numbered) )
 		return ircsend(sock,"PRIVMSG %s "
@@ -145,8 +144,7 @@ static int countchan( int sock, char **user, char *msg, char *replyto )
 static int poke( int sock, char **user, char *msg, char *replyto )
 {
 	/* silence warnings */
-	msg = 0;
-	user = 0;
+	(void)user, (void)msg;
 	shout_get();
 	if ( shout_q.id )
 		return ircsend(sock,"PRIVMSG %s :%s",replyto,shout_q.line);
@@ -155,7 +153,7 @@ static int poke( int sock, char **user, char *msg, char *replyto )
 static int recall( int sock, char **user, char *msg, char *replyto )
 {
 	/* silence warnings */
-	msg = 0;
+	(void)msg;
 	if ( !shout_q.id )
 		return ircsend(sock,"PRIVMSG %s "
 			":%s, I haven't shouted yet :/",replyto,user[0]);
@@ -213,7 +211,7 @@ static int seen( int sock, char **user, char *msg, char *replyto )
 }
 static int shout( int sock, char **user, char *msg, char *replyto )
 {
-	msg = 0;
+	(void)msg;
 	if ( strcmp(user[2],cfg.owner) )
 		return ircsend(sock,"PRIVMSG %s "
 			":Warning: %s is not in the sudoers file, "
@@ -228,7 +226,7 @@ static int shout( int sock, char **user, char *msg, char *replyto )
 }
 static int noshout( int sock, char **user, char *msg, char *replyto )
 {
-	msg = 0;
+	(void)msg;
 	if ( strcmp(user[2],cfg.owner) )
 		return ircsend(sock,"PRIVMSG %s "
 			":Warning: %s is not in the sudoers file, "
@@ -290,7 +288,7 @@ static int forgetbyname( int sock, char **user, char *msg, char *replyto )
 }
 static int brainbleach( int sock, char **user, char *msg, char *replyto )
 {
-	msg = 0;
+	(void)msg;
 	if ( strcmp(user[2],cfg.owner) )
 		return ircsend(sock,"PRIVMSG %s "
 			":Warning: %s is not in the sudoers file, "
@@ -318,7 +316,7 @@ static int brainbleach( int sock, char **user, char *msg, char *replyto )
 }
 static int save( int sock, char **user, char *msg, char *replyto )
 {
-	msg = 0;
+	(void)msg;
 	if ( strcmp(user[2],cfg.owner) )
 		return ircsend(sock,"PRIVMSG %s "
 			":Warning: %s is not in the sudoers file, "
@@ -333,7 +331,7 @@ static int save( int sock, char **user, char *msg, char *replyto )
 }
 static int nosave( int sock, char **user, char *msg, char *replyto )
 {
-	msg = 0;
+	(void)msg;
 	if ( strcmp(user[2],cfg.owner) )
 		return ircsend(sock,"PRIVMSG %s "
 			":Warning: %s is not in the sudoers file, "

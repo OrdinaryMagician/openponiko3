@@ -1,8 +1,8 @@
 # ugly ugly ugly :(
-CFLAGS := -march=native -std=c99 -Os -pipe -Wall -Wextra -Werror -pedantic \
-          `pkg-config --cflags sqlite3` `pkg-config --cflags yajl` \
+CFLAGS := -march=native -std=c11 -Os -pipe -Wall -Wextra -Werror -pedantic \
+          `pkg-config --cflags sqlite3` \
           `pkg-config --cflags libcurl`
-LDFLAGS := `pkg-config --libs sqlite3` `pkg-config --libs yajl` \
+LDFLAGS := `pkg-config --libs sqlite3` \
            `pkg-config --libs libcurl`
 SOURCES := $(patsubst %.c,%.o,$(wildcard src/*.c))
 .PHONY : clean

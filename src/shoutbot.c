@@ -72,7 +72,7 @@ void shout_tidy( void )
 static int shout_get_cl( void *to, int argc, char **argv, char **coln )
 {
 	/* silence warnings */
-	coln = 0;
+	(void)coln;
 	/* where to save? */
 	quote_t *sq = (quote_t*)to;
 	/* sanity check */
@@ -93,7 +93,7 @@ static int shout_get_cl( void *to, int argc, char **argv, char **coln )
 static int shout_get_cn( void *to, int argc, char **argv, char **coln )
 {
 	/* silence warnings */
-	coln = 0;
+	(void)coln;
 	/* where to save? */
 	long long *cn = (long long*)to;
 	/* sanity check */

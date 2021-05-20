@@ -4,7 +4,7 @@
 	Part of OpenPONIKO 3.0, the ultimate CAPS LOCK bot.
 	Released under the MIT License.
 */
-#define _BSD_SOURCE
+#define _DEFAULT_SOURCE
 #include <netinet/in.h>
 #include <stdarg.h>
 #include <stdio.h>
